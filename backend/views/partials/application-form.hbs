@@ -1,0 +1,25 @@
+<!-- Job / open application form. Posts to /api/public/applications (wired up in phase e). -->
+<form id="application-form" class="uk-form uk-grid-small" data-uk-grid method="post" action="/api/public/applications" enctype="multipart/form-data">
+	<input type="hidden" name="jobId" value="{{jobId}}">
+	<div class="uk-width-1-2@s">
+		<input class="uk-input uk-border-rounded" name="name" type="text" placeholder="Full name" aria-label="Full name" required maxlength="150">
+	</div>
+	<div class="uk-width-1-2@s">
+		<input class="uk-input uk-border-rounded" name="email" type="email" placeholder="Email address" aria-label="Email address" required maxlength="200">
+	</div>
+	<div class="uk-width-1-1">
+		<input class="uk-input uk-border-rounded" name="phone" type="tel" placeholder="Phone number (optional)" aria-label="Phone number" maxlength="50">
+	</div>
+	<div class="uk-width-1-1">
+		<textarea class="uk-textarea uk-border-rounded" name="message" rows="4" placeholder="Tell us about yourself (optional)" aria-label="Message" maxlength="3000"></textarea>
+	</div>
+	<div class="uk-width-1-1">
+		<label class="uk-text-small uk-text-muted" for="cv">CV (PDF, DOC or DOCX, max 5 MB)</label>
+		<input class="uk-input uk-border-rounded" id="cv" name="cv" type="file" accept=".pdf,.doc,.docx" required>
+	</div>
+	<!-- honeypot: real visitors never see or fill this -->
+	<div class="in-form-honeypot" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+	<div class="uk-width-1-1">
+		<button class="uk-button uk-button-primary uk-border-rounded uk-align-right" type="submit">Submit Application</button>
+	</div>
+</form>

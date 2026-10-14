@@ -1,0 +1,71 @@
+<main>
+	<!-- section content begin -->
+	<div class="uk-section">
+		<div class="uk-container">
+
+			<div class="uk-grid uk-margin-bottom">
+				<div class="uk-width-1-1">
+					<div class="uk-width-3-5@m">
+						<h1 class="uk-margin-remove-bottom">{{hl b.hero_title}}</h1>
+						<p class="uk-text-lead uk-text-muted uk-margin-small-top">{{b.hero_lead}}</p>
+					</div>
+				</div>
+			</div>
+
+			{{#if categories.length}}
+			<div class="in-insights-filter uk-flex uk-flex-wrap" style="gap:8px;">
+				<a href="/insights" class="uk-button uk-button-small uk-border-pill {{#unless activeCategory}}uk-button-primary{{else}}uk-button-default{{/unless}}">All</a>
+				{{#each categories}}
+				<a href="/insights?category={{slug}}" class="uk-button uk-button-small uk-border-pill {{#if (eq slug ../activeCategory)}}uk-button-primary{{else}}uk-button-default{{/if}}">{{name}}</a>
+				{{/each}}
+			</div>
+			{{/if}}
+
+			<div class="uk-grid uk-grid-large uk-margin-medium-top" data-uk-grid>
+				{{#each posts}}
+				<div class="uk-width-1-3@m">
+					<div class="uk-card uk-card-default uk-border-rounded uk-box-shadow-small uk-height-1-1">
+						{{#if cover}}
+						<div class="uk-card-media-top">
+							<a href="/insights/{{slug}}"><img class="uk-border-rounded-top uk-width-1-1" style="height:200px;object-fit:cover;" src="{{cover.src}}" alt="{{cover.alt}}" width="{{cover.width}}" height="{{cover.height}}" loading="lazy"></a>
+						</div>
+						{{/if}}
+						<div class="uk-card-body">
+							<div class="uk-margin-small-bottom">
+								<a href="/insights?category={{category.slug}}"><span class="uk-label in-label-small">{{category.name}}</span></a>
+							</div>
+							<h2 class="uk-h4 uk-margin-small-top uk-margin-small-bottom"><a class="uk-link-reset" href="/insights/{{slug}}">{{title}}</a></h2>
+							{{paragraphs excerpt 'uk-text-small uk-text-muted'}}
+							<hr>
+							<div class="uk-flex uk-flex-between uk-flex-middle">
+								<span class="uk-text-small uk-text-muted"><i class="fas fa-user-circle uk-margin-small-right"></i>{{authorName}}</span>
+								<span class="uk-text-small uk-text-muted">{{monthYear publishedAt}}</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				{{else}}
+				<div class="uk-width-1-1"><p class="uk-text-muted">No articles published yet. Please check back soon.</p></div>
+				{{/each}}
+			</div>
+
+			{{#if pagination}}
+			<ul class="uk-pagination uk-flex-center uk-margin-medium-top">
+				{{#if pagination.prev}}<li><a href="{{pagination.base}}{{pagination.prev}}">← Newer</a></li>{{/if}}
+				<li class="uk-disabled"><span>Page {{pagination.page}} of {{pagination.pages}}</span></li>
+				{{#if pagination.next}}<li><a href="{{pagination.base}}{{pagination.next}}">Older →</a></li>{{/if}}
+			</ul>
+			{{/if}}
+
+			<!-- Bottom CTA -->
+			<div class="uk-grid uk-flex uk-flex-center uk-margin-large-top" data-uk-grid>
+				<div class="uk-width-1-2@m uk-text-center">
+					<p class="uk-text-lead uk-text-muted">{{b.cta_lead}}</p>
+					<a href="{{b.cta_button_url}}" class="uk-button uk-button-primary uk-border-rounded">{{b.cta_button}}</a>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<!-- section content end -->
+</main>

@@ -1,0 +1,51 @@
+<!-- footer begin -->
+<footer>
+	<div class="uk-section uk-section-muted uk-padding-large uk-padding-remove-horizontal uk-margin-medium-top">
+		<div class="uk-container">
+			<div class="uk-grid-medium" data-uk-grid="">
+				<div class="uk-width-1-4@m">
+					<div class="footer-logo">
+						{{#if site.footerLogoImg}}<img class="uk-display-block" src="{{site.footerLogoImg.src}}" alt="{{site.footerLogoImg.alt}}" width="134" height="23" loading="lazy">{{/if}}
+					</div>
+					<p class="uk-margin-small-top uk-text-muted">{{site.tagline}}</p>
+					<p class="uk-text-small uk-margin-small-top">
+						<strong>{{site.host}}</strong><br>
+						<a href="mailto:{{site.contactEmail}}">{{site.contactEmail}}</a>
+					</p>
+					{{#if site.socials.length}}
+					<p class="uk-text-small uk-margin-small-top">
+						{{#each site.socials}}<a href="{{url}}" class="uk-margin-small-right" target="_blank" rel="noopener noreferrer" aria-label="{{platform}}"><i class="fab fa-{{platform}}"></i></a>{{/each}}
+					</p>
+					{{/if}}
+				</div>
+				{{#each site.offices}}
+				<div class="uk-width-1-4@m">
+					<h5 class="uk-text-uppercase uk-text-muted uk-text-small">{{name}}</h5>
+					<p class="uk-text-small">
+						{{lines addressLines}}<br>
+						<a href="tel:{{phoneRaw}}">{{phone}}</a>
+					</p>
+				</div>
+				{{/each}}
+				<div class="uk-width-1-4@m">
+					<h5 class="uk-text-uppercase uk-text-muted uk-text-small">Navigation</h5>
+					<ul class="uk-list uk-link-text uk-text-small">
+						{{#each site.footerMenu}}
+						<li><a href="{{url}}">{{label}}</a></li>
+						{{/each}}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="uk-section uk-section-secondary uk-padding-remove-vertical">
+		<div class="uk-container">
+			<div class="uk-grid uk-flex uk-flex-middle" data-uk-grid>
+				<div class="uk-width-expand@m">
+					<p class="uk-text-small uk-margin-remove">{{site.copyright}}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<!-- footer end -->

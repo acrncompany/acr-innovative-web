@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	{{> seo-head}}
+</head>
+
+<body>
+	<!-- page loader begin -->
+	<div class="page-loader">
+		<div></div>
+		<div></div>
+		<div></div>
+	</div>
+	<!-- page loader end -->
+	{{#unless bare}}{{> header}}{{/unless}}
+
+	{{{body}}}
+
+	{{#unless bare}}{{> footer}}
+
+	<!-- to top begin -->
+	<a href="#" class="to-top uk-visible@m" data-uk-scroll>
+		Top<i class="fas fa-chevron-up"></i>
+	</a>
+	<!-- to top end -->
+	{{/unless}}
+	<!-- javascript -->
+	<script src="/public/js/utilities.min.js"></script>
+	<script src="/public/js/config-theme.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,200 @@
+<main>
+	<!-- slideshow content begin -->
+	<div class="uk-section uk-padding-remove-vertical in-slideshow-gradient">
+		<div class="in-slideshow uk-position-relative" data-uk-slideshow="animation: push; autoplay: true; autoplay-interval: 12000; pause-on-hover: true; velocity: 0.5">
+			<ul class="uk-slideshow-items uk-light">
+				{{#each slides}}
+				<li{{#if @first}} class="in-slide-first"{{/if}}>
+					<div class="uk-position-cover">
+						{{#if img}}<img src="{{img.src}}" alt="{{img.alt}}" data-uk-cover width="{{img.width}}" height="{{img.height}}"{{#unless @first}} loading="lazy"{{/unless}}>{{/if}}
+					</div>
+					<span></span>
+					<div class="uk-container">
+						<div class="uk-grid" data-uk-grid>
+							<div class="uk-width-3-5@m">
+								<div class="uk-overlay">
+									{{!-- The first slide's heading is the page's single h1; other slides use a styled div --}}
+									{{#if @first}}<h1>{{hl heading}}{{#if accentText}}<br><span class="in-hero-accent">{{accentText}}</span>{{/if}}</h1>
+									{{else}}<div class="uk-h1">{{hl heading}}{{#if accentText}}<br><span class="in-hero-accent">{{accentText}}</span>{{/if}}</div>{{/if}}
+									<p class="uk-text-lead uk-visible@m">{{lead}}</p>
+									<p class="uk-visible@m uk-margin-small-bottom">{{body}}</p>
+									<div class="uk-flex uk-flex-wrap uk-visible@m" style="gap:12px;">
+										{{#if cta1Label}}<a href="{{cta1Url}}" class="uk-button uk-button-primary uk-border-rounded">{{cta1Label}}</a>{{/if}}
+										{{#if cta2Label}}<a href="{{cta2Url}}" class="uk-button uk-button-default uk-border-rounded">{{cta2Label}}</a>{{/if}}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+				{{/each}}
+			</ul>
+
+			<!-- Prev / Next arrows -->
+			<a class="uk-position-center-left uk-position-small uk-hidden-hover" href data-uk-slidenav-previous data-uk-slideshow-item="previous" aria-label="Previous slide"></a>
+			<a class="uk-position-center-right uk-position-small uk-hidden-hover" href data-uk-slidenav-next data-uk-slideshow-item="next" aria-label="Next slide"></a>
+
+			<!-- Dot navigation -->
+			<ul class="uk-slideshow-nav uk-dotnav uk-flex-center uk-position-bottom uk-position-small" style="padding-bottom:18px;"></ul>
+		</div>
+	</div>
+	<!-- slideshow content end -->
+
+	<!-- stats begin -->
+	<div class="uk-section uk-section-primary uk-padding-remove-vertical in-wave-1">
+		<div class="uk-container">
+			<div class="uk-grid uk-grid-divider uk-child-width-1-2@s uk-child-width-1-4@m in-margin-top@s in-margin-bottom@s" data-uk-grid>
+				{{#each stats}}
+				<div>
+					<div class="uk-grid uk-grid-small uk-flex uk-flex-middle">
+						<div class="uk-width-auto">
+							{{#if iconImg}}<img src="{{iconImg.src}}" alt="{{iconImg.alt}}" width="48" height="48" loading="lazy">{{/if}}
+						</div>
+						<div class="uk-width-expand">
+							<h3 class="uk-margin-remove uk-text-bold">{{#if textValue}}{{textValue}}{{else}}<span class="count" data-counter-end="{{value}}">0</span>{{suffix}}{{/if}}</h3>
+							<p class="uk-margin-remove uk-text-small">{{label}}</p>
+						</div>
+					</div>
+				</div>
+				{{/each}}
+			</div>
+		</div>
+	</div>
+	<!-- stats end -->
+
+	<!-- core services begin -->
+	<div class="uk-section in-wave-2">
+		<div class="uk-container">
+			<div class="uk-grid">
+				<div class="uk-width-3-4@m">
+					<h2 class="uk-margin-remove-bottom">{{hl b.services_title}}</h2>
+					<p class="uk-text-lead uk-text-muted uk-margin-small-top uk-margin-bottom">{{b.services_lead}}</p>
+				</div>
+			</div>
+			<div class="uk-grid-medium uk-grid-match" data-uk-grid>
+				{{#each services}}
+				<div class="uk-width-1-2@s uk-width-1-5@m">
+					<div class="uk-card uk-card-default uk-card-body uk-border-rounded uk-background-contain uk-background-bottom-center" style="background-image: url(/public/img/in-wave-card-bg-{{bg}}.png);">
+						<div class="in-icon-wrap uk-margin-bottom"><i class="{{icon}} fa-lg"></i></div>
+						<h3 class="uk-h5 uk-margin-remove"><a href="/services/{{slug}}">{{title}} <i class="fas fa-chevron-right fa-xs"></i></a></h3>
+						<p class="uk-margin-small-top">{{text}}</p>
+					</div>
+				</div>
+				{{/each}}
+			</div>
+			<div class="uk-grid uk-flex uk-flex-center uk-margin-medium-top">
+				<div class="uk-width-3-5@m">
+					<div class="uk-card uk-card-default uk-card-body uk-text-center uk-border-rounded uk-box-shadow-small in-wave-2-card">
+						<span class="uk-label in-label-small uk-text-uppercase uk-margin-small-right">{{b.services_note_label}}</span>
+						{{b.services_note_text}} <a href="{{b.services_note_url}}">{{b.services_note_link}}</a>
+					</div>
+					<div class="uk-grid-collapse uk-grid-divider uk-child-width-1-3@s uk-text-center uk-margin-top" data-uk-grid>
+						{{#each trust}}
+						<div>
+							<i class="{{icon}} fa-lg uk-margin-small-right uk-text-primary"></i>
+							<p class="uk-margin-remove uk-text-small uk-text-uppercase">{{title}}</p>
+						</div>
+						{{/each}}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- core services end -->
+
+	<!-- about + process begin -->
+	<div class="uk-section uk-section-muted uk-background-contain uk-background-center in-wave-3" style="background-image: url(/public/img/in-wave-background-1.png);" data-uk-parallax="bgy: -200">
+		<div class="uk-container">
+			<div class="uk-grid-large" data-uk-grid>
+				<div class="uk-width-1-2@m">
+					{{#if b.about_image}}<img class="uk-border-rounded uk-box-shadow-medium uk-width-1-1 uk-margin-bottom" src="{{b.about_image.src}}" alt="{{b.about_image.alt}}" width="{{b.about_image.width}}" height="{{b.about_image.height}}" loading="lazy">{{/if}}
+					<h2 class="uk-margin-remove">{{hl b.about_title}}</h2>
+					<p class="uk-margin-medium-top">{{{b.about_p1}}}</p>
+					<p>{{{b.about_p2}}}</p>
+					<a href="{{b.about_button_url}}" class="uk-button uk-button-primary uk-border-rounded uk-margin-small-top">{{b.about_button}}</a>
+				</div>
+				<div class="uk-width-1-2@m">
+					<h3 class="uk-margin-remove-bottom">{{b.process_title}}</h3>
+					<p class="uk-text-muted uk-margin-small-top">{{b.process_lead}}</p>
+					<div class="uk-grid-medium uk-child-width-1-1 uk-margin-medium-top" data-uk-grid>
+						{{#each process}}
+						<div>
+							<div class="uk-card uk-card-default uk-card-body uk-border-rounded">
+								<div class="uk-flex uk-flex-middle">
+									<div class="in-icon-wrap primary-color uk-margin-right"><i class="{{icon}} fa-lg"></i></div>
+									<div>
+										<h4 class="uk-h5 uk-margin-remove">{{title}}</h4>
+										<p class="uk-margin-remove uk-text-small">{{body}}</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						{{/each}}
+					</div>
+					<a href="{{b.process_button_url}}" class="uk-button uk-button-default uk-border-rounded uk-margin-medium-top">{{b.process_button}}</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- about + process end -->
+
+	<!-- why choose + insights begin -->
+	<div class="uk-section in-wave-4">
+		<div class="uk-container">
+			<div class="uk-grid uk-flex uk-flex-center uk-margin-bottom">
+				<div class="uk-width-1-1 uk-text-center">
+					<h2 class="uk-margin-medium-bottom">{{hl b.why_title}}</h2>
+				</div>
+				<div class="uk-width-3-4@m">
+					<div class="uk-grid-collapse uk-child-width-1-2@m in-wave-pricing" data-uk-grid>
+						{{#each why}}
+						<div>
+							<div class="uk-card uk-card-default uk-card-body {{#if @odd}}uk-box-shadow-large{{else}}uk-box-shadow-medium{{/if}}">
+								<div class="in-icon-wrap primary-color uk-margin-bottom"><i class="{{icon}} fa-lg"></i></div>
+								<h3 class="uk-h4 uk-margin-top uk-margin-remove-bottom">{{title}}</h3>
+								<p class="uk-text-muted">{{body}}</p>
+							</div>
+						</div>
+						{{/each}}
+					</div>
+				</div>
+			</div>
+			{{#if posts.length}}
+			<div class="uk-grid uk-margin-large-top" data-uk-grid>
+				<div class="uk-width-1-1 uk-text-center">
+					<h2 class="uk-margin-small-bottom">{{hl b.insights_title}}</h2>
+					<p class="uk-text-muted">{{b.insights_lead}}</p>
+				</div>
+				{{#each posts}}
+				<div class="uk-width-1-3@m">
+					<div class="uk-card uk-card-default uk-card-body uk-border-rounded uk-box-shadow-small">
+						<span class="uk-label in-label-small">{{category.name}}</span>
+						<h3 class="uk-h5 uk-margin-small-top">{{title}}</h3>
+						<p class="uk-text-small uk-text-muted">{{text}}</p>
+						<a href="/insights/{{slug}}" class="uk-button uk-button-text uk-text-small">Read More →</a>
+					</div>
+				</div>
+				{{/each}}
+				<div class="uk-width-1-1 uk-text-center uk-margin-top">
+					<a href="/insights" class="uk-button uk-button-default uk-border-rounded">{{b.insights_button}}</a>
+				</div>
+			</div>
+			{{/if}}
+		</div>
+	</div>
+	<!-- why choose + insights end -->
+
+	<!-- call to action begin -->
+	<div class="uk-section uk-section-default uk-padding-remove-vertical in-wave-5 in-offset-bottom-30">
+		<div class="uk-container">
+			<div class="uk-grid uk-flex uk-flex-center uk-text-center uk-padding-large" data-uk-grid>
+				<div class="uk-width-2-3@m">
+					<h2 class="uk-margin-remove-bottom">{{hl b.cta_title 'uk-text-primary'}}</h2>
+					<p class="uk-text-lead uk-text-muted uk-margin-small-top">{{b.cta_lead}}</p>
+					<a href="{{b.cta_button_url}}" class="uk-button uk-button-primary uk-border-rounded uk-margin-top">{{b.cta_button}}</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- call to action end -->
+</main>

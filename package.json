@@ -1,0 +1,22 @@
+{
+  "name": "acr-innovative-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ACR Innovative website: backend (NestJS + Prisma + Handlebars) and frontend (Angular admin)",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently -k -n backend,admin -c blue,green \"npm run start:dev --prefix backend\" \"npm start --prefix frontend\"",
+    "dev:backend": "npm run start:dev --prefix backend",
+    "dev:frontend": "npm start --prefix frontend",
+    "build": "node scripts/build.js",
+    "start": "npm start --prefix backend",
+    "migrate:dev": "npm run migrate:dev --prefix backend",
+    "migrate:deploy": "npm run migrate:deploy --prefix backend",
+    "seed:content": "npm run seed:content --prefix backend",
+    "seed:admin": "npm run seed:admin --prefix backend",
+    "admin:reset-password": "npm run admin:reset-password --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "10.0.6"
+  }
+}

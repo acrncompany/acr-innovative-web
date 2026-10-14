@@ -1,0 +1,28 @@
+/*
+ * site.css: small additions on top of the purchased theme (style.css, which is left untouched).
+ * Put any new/changed styles here so the theme file stays easy to replace in a redesign.
+ */
+
+/* Only the first hero slide uses <h1> (one h1 per page for SEO); other slides use .uk-h1 and need the same look. */
+.in-slideshow .uk-h1 {
+  font-size: 46px;
+  text-shadow: 2px 3px 4px rgba(0, 0, 0, 0.35);
+  line-height: 1.1;
+}
+@media (max-width: 960px) {
+  .in-slideshow .uk-h1 {
+    font-size: 32px;
+    margin-top: -50px;
+  }
+}
+
+/* Headings that are links in cards (service titles, post titles) keep the card's text colour. */
+.uk-card .uk-link-reset { color: inherit; }
+
+/* Pagination and category filter on /insights */
+.in-insights-filter { margin-bottom: 30px; }
+.in-form-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Rich text produced by the admin editor */
+.in-richtext img { max-width: 100%; height: auto; border-radius: 4px; }
+.in-richtext blockquote { border-left: 3px solid #C89B42; padding-left: 16px; margin-left: 0; color: #666; }

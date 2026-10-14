@@ -1,0 +1,378 @@
+// Prisma schema for the ACR Innovative website (MySQL).
+// Conventions:
+//  - sortOrder: lower numbers appear first.
+//  - status: DRAFT items are never shown on the public site.
+//  - Images are never stored in the DB, only a Media row (path + alt text) that other tables point to.
+//  - Media FKs use onDelete: Restrict so a still-used image can't be deleted (the API also reports where it is used).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  DRAFT
+  PUBLISHED
+}
+
+enum MenuLocation {
+  HEADER
+  FOOTER
+}
+
+enum BlockType {
+  TEXT
+  TEXTAREA
+  RICHTEXT
+  IMAGE
+  LINK
+}
+
+enum StatGroup {
+  HOME
+  ABOUT
+}
+
+// Icon + title + text repeaters used across pages (one table keeps the admin simple).
+enum FeatureGroup {
+  HOME_PROCESS // home: Discover / Strategise / Execute
+  ENGAGEMENT_STEP // how-we-work: the 5 steps (number comes from sortOrder)
+  WHY_CHOOSE // home: "Why leading businesses choose ACR"
+  ABOUT_PILLAR // about: mission / vision / values
+  TEAM_DISCIPLINE // about: CAs, CSs, legal, consultants
+  CAREER_PERK // careers: learn / culture / exposure
+  CAREER_AREA // careers: areas we hire in
+  HOME_TRUST // home: small trust badges under the services
+}
+
+// ---------------------------------------------------------------- media & settings
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  path      String   @unique @db.VarChar(500) // relative to UPLOAD_DIR, served at /uploads/<path>
+  alt       String   @db.VarChar(300)
+  width     Int?
+  height    Int?
+  mimeType  String   @db.VarChar(100)
+  sizeBytes Int
+  createdAt DateTime @default(now())
+
+  // reverse relations (used to build the "where is this used" list)
+  settingsLogo      SiteSettings[]  @relation("SettingsLogo")
+  settingsFooter    SiteSettings[]  @relation("SettingsFooterLogo")
+  settingsFavicon   SiteSettings[]  @relation("SettingsFavicon")
+  settingsOg        SiteSettings[]  @relation("SettingsOg")
+  pagesOg           Page[]
+  blocks            ContentBlock[]
+  slides            HeroSlide[]
+  stats             Stat[]
+  team              TeamMember[]
+  services          Service[]
+  posts             Post[]          @relation("PostCover")
+  postsOg           Post[]          @relation("PostOg")
+  jobsOg            Job[]
+}
+
+// Single row (id = 1). Created by the content seed.
+model SiteSettings {
+  id                     Int      @id @default(1)
+  siteName               String   @db.VarChar(200)
+  brandName              String   @db.VarChar(200) // "ACR Innovative" (header text)
+  brandSub               String   @db.VarChar(200) // "Management Services" (header sub text)
+  legalName              String   @db.VarChar(250)
+  tagline                String   @db.VarChar(300)
+  logoId                 Int?
+  footerLogoId           Int?
+  faviconId              Int?
+  contactEmail           String   @db.VarChar(200)
+  notificationEmail      String   @db.VarChar(200) // where form alerts are sent
+  footerText             String   @db.Text // copyright line; {year} is replaced on render
+  headerButtonLabel      String   @db.VarChar(100)
+  headerButtonUrl        String   @db.VarChar(300)
+  defaultMetaTitleSuffix String   @db.VarChar(200) // appended to page titles
+  defaultMetaDescription String   @db.VarChar(400)
+  defaultOgImageId       Int?
+  keywords               String   @db.VarChar(500)
+  author                 String   @db.VarChar(200)
+  themeColor             String   @db.VarChar(20)
+  foundingYear           String   @db.VarChar(10)
+  orgDescription         String   @db.VarChar(500) // used in JSON-LD
+  updatedAt              DateTime @updatedAt
+
+  logo        Media? @relation("SettingsLogo", fields: [logoId], references: [id], onDelete: Restrict)
+  footerLogo  Media? @relation("SettingsFooterLogo", fields: [footerLogoId], references: [id], onDelete: Restrict)
+  favicon     Media? @relation("SettingsFavicon", fields: [faviconId], references: [id], onDelete: Restrict)
+  defaultOg   Media? @relation("SettingsOg", fields: [defaultOgImageId], references: [id], onDelete: Restrict)
+}
+
+model Office {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(200) // "India (Head Office)"
+  shortName    String   @db.VarChar(100) // "India Office" (contact page heading)
+  addressLines String   @db.Text // one line per row (footer)
+  contactAddressLines String? @db.Text // optional different wording for the contact page
+  city         String   @db.VarChar(100)
+  region       String?  @db.VarChar(100)
+  postalCode   String?  @db.VarChar(20)
+  countryCode  String   @db.VarChar(2)
+  country      String   @db.VarChar(100)
+  streetAddress String  @db.VarChar(300) // single line for JSON-LD
+  phone        String   @db.VarChar(50) // display format
+  phoneRaw     String   @db.VarChar(30) // tel: / JSON-LD format, e.g. +919447157549
+  email        String?  @db.VarChar(200)
+  isHeadOffice Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SocialLink {
+  id        Int     @id @default(autoincrement())
+  platform  String  @db.VarChar(50) // linkedin, facebook, instagram, x, youtube...
+  url       String  @db.VarChar(500)
+  visible   Boolean @default(true)
+  sortOrder Int     @default(0)
+}
+
+model MenuItem {
+  id        Int          @id @default(autoincrement())
+  location  MenuLocation
+  label     String       @db.VarChar(100)
+  url       String       @db.VarChar(300)
+  visible   Boolean      @default(true)
+  sortOrder Int          @default(0)
+}
+
+// ---------------------------------------------------------------- pages & blocks
+
+// SEO record + title for each fixed page.
+model Page {
+  id              Int      @id @default(autoincrement())
+  key             String   @unique @db.VarChar(50) // home, services, about, how-we-work, insights, careers, contact
+  title           String   @db.VarChar(200)
+  slug            String   @db.VarChar(100) // "" for home
+  metaTitle       String?  @db.VarChar(200)
+  metaDescription String?  @db.VarChar(400)
+  ogImageId       Int?
+  updatedAt       DateTime @updatedAt
+
+  ogImage Media? @relation(fields: [ogImageId], references: [id], onDelete: Restrict)
+}
+
+// Every one-off string/image on a page (headings, intros, CTA text...).
+model ContentBlock {
+  id        Int       @id @default(autoincrement())
+  pageKey   String    @db.VarChar(50)
+  blockKey  String    @db.VarChar(100)
+  label     String    @db.VarChar(200) // human label shown in the admin
+  type      BlockType @default(TEXT)
+  value     String    @default("") @db.LongText
+  mediaId   Int?
+  sortOrder Int       @default(0)
+  updatedAt DateTime  @updatedAt
+
+  media Media? @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+
+  @@unique([pageKey, blockKey])
+}
+
+model HeroSlide {
+  id          Int      @id @default(autoincrement())
+  heading     String   @db.VarChar(300) // a newline becomes <br>
+  accentText  String?  @db.VarChar(200) // highlighted second part of the heading
+  lead        String   @db.VarChar(500)
+  body        String   @db.Text
+  imageId     Int?
+  cta1Label   String?  @db.VarChar(100)
+  cta1Url     String?  @db.VarChar(300)
+  cta2Label   String?  @db.VarChar(100)
+  cta2Url     String?  @db.VarChar(300)
+  status      Status   @default(PUBLISHED)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  image Media? @relation(fields: [imageId], references: [id], onDelete: Restrict)
+}
+
+model Stat {
+  id          Int       @id @default(autoincrement())
+  group       StatGroup
+  label       String    @db.VarChar(150)
+  value       Int? // animated counter target; null when textValue is used
+  suffix      String    @default("") @db.VarChar(10) // "+"
+  textValue   String?   @db.VarChar(100) // e.g. "All Sectors"
+  description String?   @db.Text
+  iconId      Int?
+  status      Status    @default(PUBLISHED)
+  sortOrder   Int       @default(0)
+
+  icon Media? @relation(fields: [iconId], references: [id], onDelete: Restrict)
+}
+
+model FeatureItem {
+  id        Int          @id @default(autoincrement())
+  group     FeatureGroup
+  icon      String       @default("") @db.VarChar(80) // Font Awesome class, e.g. "fas fa-building"
+  title     String       @db.VarChar(200)
+  subtitle  String?      @db.VarChar(200)
+  body      String       @db.Text
+  status    Status       @default(PUBLISHED)
+  sortOrder Int          @default(0)
+}
+
+model TeamMember {
+  id        Int     @id @default(autoincrement())
+  name      String  @db.VarChar(150)
+  role      String  @db.VarChar(200)
+  bio       String  @db.Text // paragraphs separated by a blank line
+  icon      String  @default("fas fa-user-tie") @db.VarChar(80)
+  photoId   Int?
+  status    Status  @default(PUBLISHED)
+  sortOrder Int     @default(0)
+
+  photo Media? @relation(fields: [photoId], references: [id], onDelete: Restrict)
+}
+
+// ---------------------------------------------------------------- services
+
+model ServiceCategory {
+  id        Int       @id @default(autoincrement())
+  title     String    @db.VarChar(150)
+  slug      String    @unique @db.VarChar(160)
+  sortOrder Int       @default(0)
+  services  Service[]
+}
+
+model Service {
+  id              Int             @id @default(autoincrement())
+  categoryId      Int
+  title           String          @db.VarChar(200)
+  slug            String          @unique @db.VarChar(220)
+  icon            String          @default("") @db.VarChar(80)
+  summary         String          @db.Text // card text on /services
+  homeSummary     String?         @db.Text // shorter card text on the home page (falls back to summary)
+  homeSortOrder   Int             @default(0) // order among showOnHome services
+  body            String          @db.LongText // rich text (HTML), sanitised on save and render
+  showOnHome      Boolean         @default(false)
+  status          Status          @default(PUBLISHED)
+  sortOrder       Int             @default(0)
+  metaTitle       String?         @db.VarChar(200)
+  metaDescription String?         @db.VarChar(400)
+  ogImageId       Int?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  category ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  ogImage  Media?          @relation(fields: [ogImageId], references: [id], onDelete: Restrict)
+
+  @@index([categoryId])
+}
+
+// ---------------------------------------------------------------- insights
+
+model PostCategory {
+  id        Int    @id @default(autoincrement())
+  name      String @db.VarChar(100)
+  slug      String @unique @db.VarChar(120)
+  sortOrder Int    @default(0)
+  posts     Post[]
+}
+
+model Post {
+  id              Int          @id @default(autoincrement())
+  categoryId      Int
+  title           String       @db.VarChar(250)
+  slug            String       @unique @db.VarChar(270)
+  excerpt         String       @db.Text // listing text (paragraphs separated by a blank line)
+  homeSummary     String?      @db.Text // shorter text for the home page cards
+  body            String       @db.LongText // rich text (HTML)
+  coverId         Int?
+  authorName      String       @db.VarChar(150)
+  status          Status       @default(DRAFT)
+  publishedAt     DateTime?
+  showOnHome      Boolean      @default(false)
+  sortOrder       Int          @default(0)
+  metaTitle       String?      @db.VarChar(200)
+  metaDescription String?      @db.VarChar(400)
+  ogImageId       Int?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  category PostCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  cover    Media?       @relation("PostCover", fields: [coverId], references: [id], onDelete: Restrict)
+  ogImage  Media?       @relation("PostOg", fields: [ogImageId], references: [id], onDelete: Restrict)
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+}
+
+// ---------------------------------------------------------------- careers & inboxes
+
+model Job {
+  id              Int       @id @default(autoincrement())
+  title           String    @db.VarChar(200)
+  slug            String    @unique @db.VarChar(220)
+  location        String    @db.VarChar(150)
+  employmentType  String    @db.VarChar(80) // Full-time, Internship...
+  department      String?   @db.VarChar(120)
+  description     String    @db.LongText // rich text
+  status          Status    @default(DRAFT)
+  closingDate     DateTime?
+  sortOrder       Int       @default(0)
+  metaTitle       String?   @db.VarChar(200)
+  metaDescription String?   @db.VarChar(400)
+  ogImageId       Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  ogImage      Media?           @relation(fields: [ogImageId], references: [id], onDelete: Restrict)
+  applications JobApplication[]
+}
+
+model JobApplication {
+  id             Int      @id @default(autoincrement())
+  jobId          Int? // null = open application
+  name           String   @db.VarChar(150)
+  email          String   @db.VarChar(200)
+  phone          String?  @db.VarChar(50)
+  message        String?  @db.Text
+  cvFile         String   @db.VarChar(300) // file name inside PRIVATE_DIR (never served publicly)
+  cvOriginalName String   @db.VarChar(300)
+  cvMimeType     String   @db.VarChar(100)
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  job Job? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([isRead, createdAt])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(150)
+  email     String   @db.VarChar(200)
+  phone     String?  @db.VarChar(50)
+  company   String?  @db.VarChar(200)
+  subject   String   @db.VarChar(250)
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([isRead, createdAt])
+}
+
+// ---------------------------------------------------------------- admin
+
+model AdminUser {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique @db.VarChar(200)
+  name         String    @db.VarChar(150)
+  passwordHash String    @db.VarChar(200)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+}

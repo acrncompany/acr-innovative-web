@@ -1,0 +1,31 @@
+<main data-title="blog-single">
+	<!-- blog content begin -->
+	<div class="uk-section uk-margin-small-top">
+		<div class="uk-container">
+			<div class="uk-grid uk-flex uk-flex-center in-blog-1 in-article">
+				<div class="uk-width-3-4@m">
+					<article class="uk-card uk-card-default uk-border-rounded">
+						<div class="uk-card-body">
+							<div class="uk-flex uk-flex-middle">
+								<p class="uk-text-small uk-text-muted uk-margin-remove">
+									<time datetime="{{isoDate post.publishedAt}}">{{monthYear post.publishedAt}}</time> · {{post.authorName}} · <a href="/insights?category={{post.category.slug}}">{{post.category.name}}</a>
+								</p>
+							</div>
+							<h1 class="uk-h2 uk-margin-top uk-margin-medium-bottom">{{post.title}}</h1>
+							{{#if post.cover}}
+							<figure class="in-article-image">
+								<img src="{{post.cover.src}}" class="uk-width-1-1" alt="{{post.cover.alt}}" width="{{post.cover.width}}" height="{{post.cover.height}}">
+							</figure>
+							{{/if}}
+							<div class="in-richtext">{{{post.bodyHtml}}}</div>
+						</div>
+						<div class="uk-card-footer uk-clearfix">
+							<a href="/insights" class="uk-link-muted">← Back to Insights</a>
+						</div>
+					</article>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- blog content end -->
+</main>

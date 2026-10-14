@@ -1,0 +1,39 @@
+<!-- meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{seo.title}}</title>
+<meta name="description" content="{{seo.description}}">
+<meta name="keywords" content="{{site.keywords}}">
+<meta name="author" content="{{site.author}}">
+<meta name="theme-color" content="{{site.themeColor}}">
+{{#if noindex}}<meta name="robots" content="noindex">{{/if}}
+<!-- canonical -->
+<link rel="canonical" href="{{seo.canonical}}">
+<!-- open graph -->
+<meta property="og:type" content="{{seo.ogType}}">
+<meta property="og:site_name" content="{{site.siteName}}">
+<meta property="og:title" content="{{seo.title}}">
+<meta property="og:description" content="{{seo.description}}">
+<meta property="og:url" content="{{seo.canonical}}">
+{{#if seo.image}}<meta property="og:image" content="{{seo.image.abs}}">
+<meta property="og:image:alt" content="{{seo.image.alt}}">{{/if}}
+<!-- twitter -->
+<meta name="twitter:card" content="{{#if seo.image}}summary_large_image{{else}}summary{{/if}}">
+<meta name="twitter:title" content="{{seo.title}}">
+<meta name="twitter:description" content="{{seo.description}}">
+{{#if seo.image}}<meta name="twitter:image" content="{{seo.image.abs}}">{{/if}}
+<!-- preload assets -->
+<link rel="preload" href="/public/fonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/public/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/public/fonts/rubik-v9-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/public/fonts/rubik-v9-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/public/fonts/rubik-v9-latin-300.woff2" as="font" type="font/woff2" crossorigin>
+<!-- stylesheet -->
+<link rel="stylesheet" href="/public/css/style.css">
+<link rel="stylesheet" href="/public/css/site.css">
+<!-- uikit -->
+<script src="/public/js/vendors/uikit.min.js"></script>
+<!-- favicon / touch icon -->
+<link rel="shortcut icon" href="{{site.faviconSrc}}">
+<link rel="apple-touch-icon-precomposed" href="/public/img/apple-touch-icon.png">
+{{#if jsonld}}<script type="application/ld+json">{{{jsonld}}}</script>{{/if}}

@@ -1,0 +1,42 @@
+<main>
+	<!-- section content begin -->
+	<div class="uk-section in-card-10">
+		<div class="uk-container">
+			<div class="uk-grid">
+				<div class="uk-width-1-1">
+					<div class="uk-width-3-5@m">
+						<h1 class="uk-margin-remove">{{hl b.hero_title}}</h1>
+						<p class="uk-text-lead uk-text-muted uk-margin-small-top">{{b.hero_lead}}</p>
+					</div>
+				</div>
+			</div>
+
+			{{#each clusters}}
+			<!-- Cluster: {{title}} -->
+			<div class="uk-grid uk-margin-large-top" data-uk-grid>
+				<div class="uk-width-1-1">
+					<h2 class="uk-h3 in-highlight">{{title}}</h2>
+				</div>
+				{{#each services}}
+				<div class="{{../colClass}}">
+					<div class="uk-card uk-card-default uk-card-body uk-border-rounded uk-background-contain uk-background-bottom-center" style="background-image: url(/public/img/in-wave-card-bg-{{bg}}.png);">
+						<div class="in-icon-wrap uk-margin-bottom"><i class="{{icon}} fa-lg"></i></div>
+						<h3 class="uk-h5 uk-margin-remove"><a href="/services/{{slug}}">{{title}} <i class="fas fa-chevron-right fa-xs"></i></a></h3>
+						<p class="uk-margin-small-top">{{summary}}</p>
+					</div>
+				</div>
+				{{/each}}
+			</div>
+			{{/each}}
+
+			<!-- Bottom CTA -->
+			<div class="uk-grid uk-flex uk-flex-center uk-margin-large-top" data-uk-grid>
+				<div class="uk-width-1-2@m uk-text-center">
+					<p class="uk-text-lead">{{b.cta_lead}}</p>
+					<a href="{{b.cta_button_url}}" class="uk-button uk-button-primary uk-border-rounded">{{b.cta_button}}</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- section content end -->
+</main>

@@ -1,0 +1,43 @@
+<main>
+	<div class="uk-section">
+		<div class="uk-container">
+			<div class="uk-grid">
+				<div class="uk-width-1-1 uk-flex uk-flex-center">
+					<div class="uk-width-3-4@m uk-text-center uk-margin-medium-bottom">
+						<h1 class="uk-margin-remove-bottom">{{hl b.hero_title}}</h1>
+						<p class="uk-text-lead uk-text-muted uk-margin-small-top">{{b.hero_lead}}</p>
+					</div>
+				</div>
+			</div>
+
+			{{#each steps}}
+			<!-- Step {{pad2 (inc @index)}} -->
+			<div class="uk-grid uk-flex uk-flex-middle {{#if @first}}uk-margin-large-top{{else}}uk-margin-medium-top{{/if}}" data-uk-grid>
+				<div class="uk-width-1-12@m uk-text-center">
+					<div class="in-icon-wrap primary-color" style="width:56px;height:56px;font-size:1.4rem;margin:0 auto;">
+						<i class="{{icon}}"></i>
+					</div>
+				</div>
+				<div class="uk-width-2-12@m uk-text-center@m">
+					<span class="uk-text-primary" style="font-size:3rem;font-weight:700;line-height:1;">{{pad2 (inc @index)}}</span>
+					<h2 class="uk-h4 uk-margin-remove">{{title}}</h2>
+				</div>
+				<div class="uk-width-9-12@m">
+					<div class="uk-card uk-card-default uk-card-body uk-border-rounded uk-box-shadow-small">
+						<h3 class="uk-h4 uk-margin-remove-top uk-margin-small-bottom">{{subtitle}}</h3>
+						<p class="uk-margin-remove-bottom uk-text-muted">{{body}}</p>
+					</div>
+				</div>
+			</div>
+			{{/each}}
+
+			<!-- Bottom CTA -->
+			<div class="uk-grid uk-flex uk-flex-center uk-margin-large-top" data-uk-grid>
+				<div class="uk-width-1-2@m uk-text-center">
+					<p class="uk-text-lead">{{b.cta_lead}}</p>
+					<a href="{{b.cta_button_url}}" class="uk-button uk-button-primary uk-border-rounded">{{b.cta_button}}</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>

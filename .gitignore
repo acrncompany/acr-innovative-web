@@ -1,0 +1,7 @@
+reference/
+node_modules/
+.env
+dist/
+dist-admin/
+.angular/
+*.log

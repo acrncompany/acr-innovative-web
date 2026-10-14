@@ -1,0 +1,50 @@
+<!-- header begin -->
+<header>
+	{{#if (eq activePath '/')}}
+	<div class="uk-section uk-padding-remove-vertical in-header-inverse ">
+	{{else}}
+	<div class="uk-section uk-padding-remove-vertical in-header-inner uk-background-cover uk-background-top-center" style="background-image: url(/public/img/in-wave-background-1.png);">
+	{{/if}}
+		<nav class="uk-navbar-container uk-navbar-transparent" data-uk-sticky="show-on-up: true; top: 80; animation: uk-animation-fade">
+			<div class="uk-container" data-uk-navbar>
+				<div class="uk-navbar-left uk-width-expand">
+					<a class="uk-navbar-item uk-logo in-brand" href="/">
+						{{#if site.logoImg}}<img src="{{site.logoImg.src}}" alt="{{site.logoImg.alt}}" width="{{#if (eq activePath '/')}}36{{else}}44{{/if}}" height="{{#if (eq activePath '/')}}36{{else}}44{{/if}}">{{/if}}<span><b class="in-brand-name">{{site.brandName}}</b><small class="in-brand-sub">{{site.brandSub}}</small></span>
+					</a>
+					<ul class="uk-navbar-nav uk-visible@m">
+						{{#each site.headerMenu}}
+						<li{{#if (eq url ../activePath)}} class="uk-active"{{/if}}><a href="{{url}}">{{label}}</a></li>
+						{{/each}}
+					</ul>
+				</div>
+				<div class="uk-navbar-right uk-width-auto">
+					<div class="uk-navbar-item uk-visible@m">
+						<a href="{{site.headerButtonUrl}}" class="uk-button uk-button-primary uk-button-small uk-border-pill">{{site.headerButtonLabel}}</a>
+					</div>
+				</div>
+			</div>
+		</nav>
+		<div class="uk-container">
+			<div class="uk-grid">
+				<div class="uk-width-1-1">
+					{{#unless (eq activePath '/')}}
+					<!-- breadcrumb content begin -->
+					<div class="uk-section uk-padding-remove-vertical in-wave-breadcrumb">
+						<div class="uk-container">
+							<div class="uk-grid">
+								<div class="uk-width-1-1">
+									<ul class="uk-breadcrumb">
+										<li><a href="/">Home</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- breadcrumb content end -->
+					{{/unless}}
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+<!-- header end -->
