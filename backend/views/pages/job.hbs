@@ -1,0 +1,18 @@
+<main>
+	<div class="uk-section">
+		<div class="uk-container">
+			<div class="uk-grid uk-flex uk-flex-center">
+				<div class="uk-width-3-4@m">
+					<p class="uk-text-small uk-text-muted uk-text-uppercase uk-margin-remove-bottom">{{job.location}} · {{job.employmentType}}{{#if job.department}} · {{job.department}}{{/if}}</p>
+					<h1 class="uk-margin-small-top">{{job.title}}</h1>
+					<div class="in-richtext uk-margin-medium-top">{{{job.descriptionHtml}}}</div>
+
+					<h2 class="uk-h3 uk-margin-large-top uk-margin-medium-bottom">Apply for this role</h2>
+					{{> application-form jobId=job.id}}
+
+					<p class="uk-margin-medium-top"><a href="/careers" class="uk-link-muted">← All careers</a></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>

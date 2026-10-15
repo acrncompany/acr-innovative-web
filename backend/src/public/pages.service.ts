@@ -3,6 +3,7 @@ import { Media, Status } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { env } from '../config/env';
 import { sanitizeRichText, stripHtml, truncate } from '../common/sanitize';
+import { buildTitle } from '../seo/seo-rules';
 
 export type ImageView = { src: string; alt: string; width?: number | null; height?: number | null };
 
@@ -13,12 +14,13 @@ export function imageView(m: Media | null | undefined): ImageView | null {
 }
 
 export type SeoInput = {
-  title?: string | null; // full <title> if given, else `${fallbackTitle} — suffix`
+  title?: string | null; // custom meta title; if empty see seo/seo-rules.ts
   fallbackTitle?: string;
   description?: string | null;
   path: string; // canonical path, e.g. "/about"
   image?: ImageView | null;
   ogType?: 'website' | 'article';
+  publishedTime?: Date | null; // for article pages
 };
 
 @Injectable()
@@ -43,7 +45,8 @@ export class PagesService {
       host: new URL(env.siteUrl).host,
       logoImg: imageView(settings.logo),
       footerLogoImg: imageView(settings.footerLogo),
-      faviconSrc: settings.favicon ? `/uploads/${settings.favicon.path}` : '/public/img/favicon.ico',
+      // Favicon files are generated from settings.faviconId (see common/favicon.ts); the id busts browser caches when it changes.
+      faviconVersion: settings.faviconId,
       copyright: settings.footerText.replace('{year}', String(year)),
       headerMenu: menu.filter((m) => m.location === 'HEADER'),
       footerMenu: menu.filter((m) => m.location === 'FOOTER'),
@@ -69,9 +72,11 @@ export class PagesService {
 
   /** Build the SEO object for the layout's <head>. Everything has a sensible fallback. */
   seo(site: Awaited<ReturnType<PagesService['site']>>, input: SeoInput) {
-    const suffix = site.defaultMetaTitleSuffix;
-    const title = input.title?.trim() || (input.fallbackTitle ? `${input.fallbackTitle} — ${suffix}` : suffix);
-    const description = (input.description?.trim() || site.defaultMetaDescription) as string;
+    const title = buildTitle({
+      metaTitle: input.title, pageTitle: input.fallbackTitle, isHome: input.path === '/',
+      siteName: site.siteName, suffix: site.defaultMetaTitleSuffix,
+    });
+    const description = input.description?.trim() || site.defaultMetaDescription;
     const image = input.image || imageView(site.defaultOg);
     const abs = (p: string) => (/^https?:/.test(p) ? p : `${env.siteUrl}${p}`);
     return {
@@ -79,6 +84,7 @@ export class PagesService {
       description,
       canonical: abs(input.path === '/' ? '/' : input.path),
       ogType: input.ogType || 'website',
+      publishedTime: input.publishedTime ? input.publishedTime.toISOString() : null,
       image: image ? { ...image, abs: abs(image.src) } : null,
     };
   }

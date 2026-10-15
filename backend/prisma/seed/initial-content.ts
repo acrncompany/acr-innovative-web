@@ -12,45 +12,64 @@ import 'dotenv/config';
 import { PrismaClient, Status } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
-import sharp from 'sharp';
+import { loadSharp, mimeFromExt, processImage } from '../../src/common/image-processor';
+import { generateFaviconSet } from '../../src/common/favicon';
 import * as data from './data/content';
 
 const prisma = new PrismaClient();
 const backendRoot = path.resolve(__dirname, '..', '..');
 const uploadDir = path.resolve(backendRoot, process.env.UPLOAD_DIR || '../../acr-data/uploads');
-const assetsDir = path.join(__dirname, 'assets');
 
-const MIME: Record<string, string> = {
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
-  '.svg': 'image/svg+xml', '.gif': 'image/gif',
-};
+/**
+ * Seed images live in backend/prisma/seed-assets/ (already optimized WebP/SVG, committed to git), so a fresh
+ * clone or the server can seed without the git-ignored reference/ folder.
+ * Optional override: SEED_ASSETS_DIR (may contain raw JPG/PNG; those are run through the image pipeline).
+ * Regenerate the folder from reference/ with `npm run seed:build-assets`.
+ */
+const assetsDir = path.resolve(backendRoot, process.env.SEED_ASSETS_DIR || 'prisma/seed-assets');
+const faviconDir = path.join(uploadDir, '_favicon');
 
-/** Copy a bundled seed image into UPLOAD_DIR/seed/ and register it as Media (once per file). */
+/** Find the source file; tolerate a different extension (e.g. override folder holds .png instead of .webp). */
+function findSource(file: string): string {
+  const exact = path.join(assetsDir, file);
+  if (fs.existsSync(exact)) return exact;
+  const base = path.basename(file, path.extname(file));
+  for (const ext of ['.webp', '.png', '.jpg', '.jpeg', '.svg']) {
+    const alt = path.join(assetsDir, base + ext);
+    if (fs.existsSync(alt)) return alt;
+  }
+  throw new Error(`Seed image not found: ${exact} (set SEED_ASSETS_DIR)`);
+}
+
+/** Copy a seed image into UPLOAD_DIR/seed/ and register it as Media (once per file). */
 async function ensureMedia(file: string, alt: string): Promise<number> {
-  const rel = `seed/${file}`;
+  const src = findSource(file);
+  const ext = path.extname(src).toLowerCase();
+  const raw = fs.readFileSync(src);
+
+  // WebP/SVG are already optimized: copy as-is. Anything else goes through the shared pipeline.
+  let buffer = raw, outExt = ext, mimeType = mimeFromExt(ext), width: number | null = null, height: number | null = null;
+  if (ext !== '.webp' && ext !== '.svg') {
+    const img = await processImage(raw, src);
+    ({ buffer, ext: outExt, mimeType, width, height } = img);
+  } else if (ext === '.webp') {
+    const sharp = loadSharp();
+    if (sharp) {
+      const meta = await sharp(raw).metadata();
+      width = meta.width ?? null;
+      height = meta.height ?? null;
+    }
+  }
+
+  const rel = `seed/${path.basename(src, ext)}${outExt}`;
   const existing = await prisma.media.findUnique({ where: { path: rel } });
   if (existing) return existing.id;
 
-  const src = path.join(assetsDir, file);
   const dest = path.join(uploadDir, rel);
   fs.mkdirSync(path.dirname(dest), { recursive: true });
-  if (!fs.existsSync(dest)) fs.copyFileSync(src, dest);
-
-  let width: number | undefined;
-  let height: number | undefined;
-  try {
-    const meta = await sharp(src).metadata();
-    width = meta.width;
-    height = meta.height;
-  } catch {
-    /* dimensions are optional */
-  }
+  fs.writeFileSync(dest, buffer);
   const media = await prisma.media.create({
-    data: {
-      path: rel, alt, width, height,
-      mimeType: MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
-      sizeBytes: fs.statSync(dest).size,
-    },
+    data: { path: rel, alt, width, height, mimeType, sizeBytes: buffer.length },
   });
   return media.id;
 }
@@ -177,13 +196,19 @@ async function main() {
     }
   }
 
+  // ---- favicon set generated from the logo (square 512 source), also registered as Media so settings can reference it
+  const faviconMediaId = await ensureMedia('ACR-Logo-icon.webp', 'ACR logo icon');
+  const ok = await generateFaviconSet(fs.readFileSync(findSource('ACR-Logo-icon.webp')), faviconDir);
+  if (!ok) console.warn('sharp unavailable: favicon files were not generated. Re-save the favicon in admin settings later.');
+
   // ---- settings LAST (marker that seeding finished)
   await prisma.siteSettings.create({
     data: {
       id: 1, ...data.settings,
-      logoId: await ensureMedia('ACR-Logo.png', 'ACR logo'),
+      logoId: await ensureMedia('ACR-Logo.webp', 'ACR logo'),
+      faviconId: faviconMediaId,
       footerLogoId: await ensureMedia('footer-logo-3WIDIh.svg', 'ACR Innovative Management Services'),
-      defaultOgImageId: await ensureMedia('in-acr-about.jpg', 'ACR Innovative — professional advisory office'),
+      defaultOgImageId: await ensureMedia('in-acr-about.webp', 'ACR Innovative — professional advisory office'),
     },
   });
 

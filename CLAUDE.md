@@ -18,16 +18,28 @@ Rebuild of acrinnovative.com (old static site is in `reference/acrinnovative-sta
 - Template text convention: `[[words]]` = highlighted, newline = `<br>` (helper `hl`). Partials are registered by file name WITH dashes (`{{> seo-head}}`), see `main.ts`.
 - One `<h1>` per page. Only the first hero slide is an `<h1>`; others use `.uk-h1`.
 - Theme CSS (`public/css/style.css`) is left untouched; our additions go in `public/css/site.css`.
-- Redirects live in ONE file: `backend/src/seo/redirects.ts` (phase b).
+- Redirects live in ONE file: `backend/src/seo/redirects.ts` (applied by `seo.middleware.ts`, 301, keeps query string). `/sitemap.xml` and `/robots.txt` are in `seo.controller.ts`; JSON-LD builders in `seo/jsonld.ts` (business on home, Article on posts).
 - Seeds are idempotent and never overwrite: `seed:content` (run once; `SiteSettings` is the "done" marker) and `seed:admin` (creates the admin only if none exists). Reset a password with `npm run admin:reset-password`.
+- Images (seed AND uploads) go through `src/common/image-processor.ts` (resize + WebP; SVG/GIF/ICO kept; falls back to the original if sharp is unavailable). Uploads: type is verified from the file's bytes (JPG/PNG/WebP), 5 MB, alt text required.
+- Seed images: already-optimized WebP/SVG committed in `backend/prisma/seed-assets/`; the seed never needs `reference/`. Regenerate them (dev only) with `npm run seed:build-assets`. `SEED_ASSETS_DIR` is an optional override.
+- Favicon: generated from the logo by `src/common/favicon.ts` into `UPLOAD_DIR/_favicon` (favicon.ico 16+32, 32px PNG, 180 apple-touch, 192/512 PNG) and served at the root URLs + `/site.webmanifest` by `seo/favicon.controller.ts`. Seeded via `SiteSettings.faviconId`; `PATCH /api/admin/settings` with a new `faviconId` regenerates the set (`POST /api/admin/settings/favicon/regenerate` forces it). Head links carry `?v=<faviconId>`.
+- Title rules live in ONE place, `seo/seo-rules.ts`: custom meta title wins; home without one = brand only (never "Home — ..."); other pages = "Page — Brand". The admin's SEO preview (`POST /api/admin/seo/preview`) uses the same functions. og:title/twitter:title = the same title.
 - Password hashing: `bcryptjs` (pure JS, no native build on shared hosting). `sharp` is the only native dependency.
 - Rich text editor in the admin: Tiptap (`ngx-tiptap`); MIT, maintained, clean HTML.
 
 ## Pinned versions (exact, no ^)
 Nest 11.2.7 (core/common/platform-express), Prisma + @prisma/client 6.19.3, sharp 0.35.5, hbs 4.3.1, helmet 8.3.0, TypeScript 5.9.3, Node 22 locally (Hostinger: 20/22). Angular versions are pinned when `frontend/` is created in phase (d) and recorded here.
 
+## Auth and admin API (phase c)
+- Everything under `/api/admin` is protected by the GLOBAL `AdminGuard` (path-based, `auth/admin.guard.ts`); only `@Public()` routes (login, logout) are open. JWT in httpOnly, SameSite=strict cookie `acr_admin` (Secure in production, 12 h). The token carries a password fingerprint, so changing/resetting the password logs out all sessions.
+- Login is rate-limited 5/min/IP (ThrottlerGuard opt-in per route; the public forms in phase e do the same). `TRUST_PROXY` makes that the real client IP.
+- Most resources are one config entry in `admin-api/resources.ts` using the generic `crud.ts` factory (list/get/create/update/delete/`PUT /reorder`, filters, slug generation, rich-text sanitising). DTOs in `admin-api/dto.ts` (trimmed strings, link URLs can't be `javascript:`). Special controllers: media (usage + delete protection), settings, inbox (+ authenticated CV download), dashboard, SEO preview.
+- Inboxes are read-only by design (list, open, mark read/unread; no delete). Fixed pages and content blocks can be edited, not created/deleted.
+- `npm run admin:reset-password` (interactive, or `-- --email x --password y`).
+- Windows gotcha: `npm run build` runs `prisma generate`, which fails with EPERM while a Node process (e.g. `start:dev`) holds the Prisma engine. Stop the server first.
+
 ## Phases
-a) scaffold/schema/seed/public pages (done) · b) SEO · c) auth + admin API · d) Angular admin · e) contact/careers forms · f) build script + Hostinger notes. Stop after each phase for review.
+a) scaffold/schema/seed/public pages (done) · b) SEO (done) · c) auth + admin API (done) · d) Angular admin · e) contact/careers forms · f) build script + Hostinger notes. Stop after each phase for review.
 
 ## Local dev notes
 - `backend/.env` (git-ignored) points at XAMPP MySQL `mysql://root:@localhost:3306/acr_innovative_web`.

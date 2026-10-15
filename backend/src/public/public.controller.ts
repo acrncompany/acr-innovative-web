@@ -4,6 +4,8 @@ import { Status } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { sanitizeRichText, stripHtml, truncate } from '../common/sanitize';
 import { imageView, PagesService } from './pages.service';
+import { articleJsonLd, businessJsonLd, toJsonLdScript } from '../seo/jsonld';
+import { env } from '../config/env';
 
 const POSTS_PER_PAGE = 12;
 
@@ -30,8 +32,10 @@ export class PublicController {
         orderBy: { publishedAt: 'desc' }, take: 3, include: { category: true },
       }),
     ]);
+    const offices = await this.prisma.office.findMany({ orderBy: { sortOrder: 'asc' } });
     return res.render('pages/home', {
       ...ctx,
+      jsonld: toJsonLdScript(businessJsonLd(env.siteUrl, ctx.site as any, offices)),
       slides: slides.map((s) => ({ ...s, img: imageView(s.image) })),
       stats: stats.map((s) => ({ ...s, iconImg: imageView(s.icon) })),
       services: services.map((s, i) => ({ ...s, text: s.homeSummary || s.summary, bg: (i % 4) + 1 })),
@@ -115,6 +119,11 @@ export class PublicController {
       this.prisma.postCategory.findMany({ orderBy: { sortOrder: 'asc' } }),
     ]);
     const pages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
+    // Canonical points at this exact listing (category / page), so filtered pages aren't treated as duplicates of /insights.
+    const q = new URLSearchParams();
+    if (categorySlug) q.set('category', categorySlug);
+    if (page > 1) q.set('page', String(page));
+    if (q.toString()) ctx.seo.canonical += '?' + q.toString();
     return res.render('pages/insights', {
       ...ctx, categories, activeCategory: categorySlug || '',
       posts: posts.map((p) => this.pages.postCard(p)),
@@ -136,10 +145,15 @@ export class PublicController {
     const seo = this.pages.seo(site, {
       title: p.metaTitle, fallbackTitle: p.title,
       description: p.metaDescription || truncate(stripHtml(p.excerpt), 160),
-      path: `/insights/${p.slug}`, image: imageView(p.ogImage) || cover, ogType: 'article',
+      path: `/insights/${p.slug}`, image: imageView(p.ogImage) || cover, ogType: 'article', publishedTime: p.publishedAt,
     });
+    const jsonld = toJsonLdScript(articleJsonLd({
+      url: seo.canonical, title: p.title, description: seo.description, image: seo.image?.abs,
+      authorName: p.authorName, publishedAt: p.publishedAt, updatedAt: p.updatedAt,
+      publisherName: site.legalName, logo: site.logoImg ? env.siteUrl + site.logoImg.src : null,
+    }));
     return res.render('pages/post', {
-      site, seo, activePath: '/insights',
+      site, seo, jsonld, activePath: '/insights',
       post: { ...p, cover, bodyHtml: sanitizeRichText(p.body) },
     });
   }
@@ -156,6 +170,22 @@ export class PublicController {
       }),
     ]);
     return res.render('pages/careers', { ...ctx, perks, areas, jobs });
+  }
+
+  @Get('careers/:slug')
+  async job(@Param('slug') slug: string, @Res() res: Response) {
+    const j = await this.prisma.job.findFirst({
+      where: { slug, status: Status.PUBLISHED, OR: [{ closingDate: null }, { closingDate: { gte: new Date() } }] },
+      include: { ogImage: true },
+    });
+    if (!j) throw new NotFoundException();
+    const [site, b] = await Promise.all([this.pages.site(), this.pages.blocks('careers')]);
+    const seo = this.pages.seo(site, {
+      title: j.metaTitle, fallbackTitle: j.title,
+      description: j.metaDescription || truncate(stripHtml(j.description), 160),
+      path: `/careers/${j.slug}`, image: imageView(j.ogImage),
+    });
+    return res.render('pages/job', { site, b, seo, activePath: '/careers', job: { ...j, descriptionHtml: sanitizeRichText(j.description) } });
   }
 
   @Get('contact')

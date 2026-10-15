@@ -15,6 +15,7 @@
 <meta property="og:title" content="{{seo.title}}">
 <meta property="og:description" content="{{seo.description}}">
 <meta property="og:url" content="{{seo.canonical}}">
+{{#if seo.publishedTime}}<meta property="article:published_time" content="{{seo.publishedTime}}">{{/if}}
 {{#if seo.image}}<meta property="og:image" content="{{seo.image.abs}}">
 <meta property="og:image:alt" content="{{seo.image.alt}}">{{/if}}
 <!-- twitter -->
@@ -33,7 +34,11 @@
 <link rel="stylesheet" href="/public/css/site.css">
 <!-- uikit -->
 <script src="/public/js/vendors/uikit.min.js"></script>
-<!-- favicon / touch icon -->
-<link rel="shortcut icon" href="{{site.faviconSrc}}">
-<link rel="apple-touch-icon-precomposed" href="/public/img/apple-touch-icon.png">
+<!-- favicon set (generated from the logo / settings favicon) -->
+{{#if site.faviconVersion}}
+<link rel="icon" href="/favicon.ico?v={{site.faviconVersion}}" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v={{site.faviconVersion}}">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v={{site.faviconVersion}}">
+<link rel="manifest" href="/site.webmanifest?v={{site.faviconVersion}}">
+{{/if}}
 {{#if jsonld}}<script type="application/ld+json">{{{jsonld}}}</script>{{/if}}

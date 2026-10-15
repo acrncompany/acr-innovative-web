@@ -20,7 +20,16 @@ export const env = {
   siteUrl: (process.env.SITE_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/+$/, ''),
   trustProxy: process.env.TRUST_PROXY ?? '1',
   databaseUrl: required('DATABASE_URL'),
+  jwtSecret: required('JWT_SECRET'),
+  /** Admin login cookie lifetime. */
+  sessionHours: 12,
+  /** Cookie "Secure" flag: on in production (HTTPS). Set COOKIE_SECURE=true to force it locally. */
+  cookieSecure: process.env.NODE_ENV === 'production' || process.env.COOKIE_SECURE === 'true',
 };
+
+if (env.isProd && env.jwtSecret.length < 32) {
+  throw new Error('JWT_SECRET must be at least 32 characters in production.');
+}
 
 export const paths = {
   backendRoot,

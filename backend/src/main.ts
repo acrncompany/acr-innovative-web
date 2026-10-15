@@ -2,6 +2,9 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import compression from 'compression';
+import { NextFunction, Request, Response } from 'express';
+import cookieParser from 'cookie-parser';
+import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import hbs from 'hbs';
 import * as path from 'path';
@@ -9,6 +12,7 @@ import * as fs from 'fs';
 import { AppModule } from './app.module';
 import { env, paths } from './config/env';
 import { registerHelpers } from './public/hbs-helpers';
+import { noindexMiddleware, redirectMiddleware } from './seo/seo.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -37,11 +41,24 @@ async function bootstrap() {
     }),
   );
   app.use(compression());
+  app.use(cookieParser());
+  app.useBodyParser('json', { limit: '2mb' }); // rich-text bodies can be large
+  // Validate every request body against its DTO class; unknown fields are dropped.
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  // SEO: noindex header for /admin and /api, 301s from old URLs (src/seo/redirects.ts), and revalidate HTML on every request.
+  // (Static asset routes below set their own long cache headers, which override this default.)
+  app.use(noindexMiddleware);
+  app.use(redirectMiddleware);
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (!req.path.startsWith('/public/') && !req.path.startsWith('/uploads/')) res.setHeader('Cache-Control', 'no-cache');
+    next();
+  });
 
   // Static design assets (repo) and admin uploads (outside the app folder).
   fs.mkdirSync(paths.uploadDir, { recursive: true });
   app.useStaticAssets(paths.publicDir, { prefix: '/public/', maxAge: 7 * 24 * 3600 * 1000, index: false });
-  app.useStaticAssets(paths.uploadDir, { prefix: '/uploads/', maxAge: 30 * 24 * 3600 * 1000, index: false });
+  app.useStaticAssets(paths.uploadDir, { prefix: '/uploads/', maxAge: 30 * 24 * 3600 * 1000, immutable: true, index: false });
 
   // Handlebars views: layouts/main.hbs wraps every page; partials live in views/partials.
   app.setBaseViewsDir(paths.views);

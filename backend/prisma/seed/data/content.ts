@@ -84,8 +84,9 @@ export const menuItems = (['HEADER', 'FOOTER'] as const).flatMap((location) =>
   nav.map(([label, url], i) => ({ location, label, url, sortOrder: i + 1 })),
 );
 
-export const pages = [
-  { key: 'home', title: 'Home', slug: '' },
+// Home <title> is just the brand (no "Home"). Other pages fall back to "Page — Brand".
+export const pages: { key: string; title: string; slug: string; metaTitle?: string }[] = [
+  { key: 'home', title: 'Home', slug: '', metaTitle: settings.siteName },
   { key: 'services', title: 'Services', slug: 'services' },
   { key: 'about', title: 'About Us', slug: 'about' },
   { key: 'how-we-work', title: 'How We Work', slug: 'how-we-work' },
@@ -100,7 +101,7 @@ export const heroSlides = [
     accentText: 'Beyond Numbers.',
     lead: 'From Compliance to Clarity. From Data to Decisions.',
     body: 'Integrated financial, regulatory, and business consulting for startups, SMEs, and enterprises across India and the UAE.',
-    image: { file: 'banner111.png', alt: 'ACR Innovative Management Services — Advisory firm' },
+    image: { file: 'banner111.webp', alt: 'ACR Innovative Management Services — Advisory firm' },
     cta1Label: 'Explore Services', cta1Url: '/services',
     cta2Label: 'Get in Touch', cta2Url: '/contact',
   },
@@ -109,7 +110,7 @@ export const heroSlides = [
     accentText: null,
     lead: 'Statutory audits, GST compliance, tax planning — handled by qualified CAs with deep sectoral knowledge.',
     body: 'Over 2,000 businesses across Kerala and the UAE rely on ACR for clarity, compliance, and confident decision-making.',
-    image: { file: 'banner2.jpg', alt: '25 years of trusted financial expertise' },
+    image: { file: 'banner2.webp', alt: '25 years of trusted financial expertise' },
     cta1Label: 'About ACR', cta1Url: '/about',
     cta2Label: 'Our Services', cta2Url: '/services',
   },
@@ -118,7 +119,7 @@ export const heroSlides = [
     accentText: null,
     lead: 'Integrated advisory for businesses operating across India and the UAE.',
     body: 'Regulatory compliance, business structuring, and financial governance — seamlessly coordinated across both jurisdictions.',
-    image: { file: 'banner33.png', alt: 'ACR — India and UAE advisory presence' },
+    image: { file: 'banner33.webp', alt: 'ACR — India and UAE advisory presence' },
     cta1Label: 'Talk to Our Experts', cta1Url: '/contact',
     cta2Label: 'How We Work', cta2Url: '/how-we-work',
   },
@@ -249,7 +250,7 @@ export const posts = [
     p2: 'In this article, we cover the most significant regulatory updates of 2025, the common compliance gaps we see in practice, and a practical checklist for ensuring your business remains fully compliant.',
     home: 'Key regulatory updates, filing obligations, and risk mitigation strategies every Indian business must be prepared for.',
     author: 'ACR Tax Advisory Team', date: '2025-03-01',
-    cover: { file: 'in-acr-insight-1.jpg', alt: 'GST Compliance 2025' },
+    cover: { file: 'in-acr-insight-1.webp', alt: 'GST Compliance 2025' },
   },
   {
     cat: 'technology', slug: 'how-smes-can-leverage-business-process-automation-to-scale',
@@ -258,7 +259,7 @@ export const posts = [
     p2: 'This article explores where automation creates the most impact for growing businesses and how to build a roadmap that scales with your organisation.',
     home: 'Reduce manual overhead, eliminate errors, and build a scalable operational foundation for sustainable growth.',
     author: 'ACR Technology Practice', date: '2025-02-01',
-    cover: { file: 'in-acr-insight-2.jpg', alt: 'Business Process Automation for SMEs' },
+    cover: { file: 'in-acr-insight-2.webp', alt: 'Business Process Automation for SMEs' },
   },
   {
     cat: 'fpa', slug: 'the-case-for-fpa-why-data-driven-finance-is-the-future',
@@ -267,7 +268,7 @@ export const posts = [
     p2: 'We explain what FP&A means in practice for SMEs and why management reporting is the most underutilised tool in most businesses today.',
     home: 'Real-time dashboards and KPI frameworks enable leadership teams to make faster, smarter, more confident decisions.',
     author: 'ACR FP&A Team', date: '2025-01-01',
-    cover: { file: 'in-acr-insight-3.jpg', alt: 'FPA and data-driven finance' },
+    cover: { file: 'in-acr-insight-3.webp', alt: 'FPA and data-driven finance' },
   },
 ];
 
@@ -282,7 +283,7 @@ export const blocks: BlockSeed[] = [
   b('home', 'services_note_text', 'Services note: text', 'ACR offers 13+ integrated advisory services across business, finance, tax, and technology.'),
   b('home', 'services_note_link', 'Services note: link text', 'View all services →'),
   b('home', 'services_note_url', 'Services note: link URL', '/services'),
-  { pageKey: 'home', blockKey: 'about_image', label: 'About blurb: image', type: 'IMAGE', image: { file: 'in-acr-home-about.jpg', alt: 'ACR advisory office' } },
+  { pageKey: 'home', blockKey: 'about_image', label: 'About blurb: image', type: 'IMAGE', image: { file: 'in-acr-home-about.webp', alt: 'ACR advisory office' } },
   b('home', 'about_title', 'About blurb: title', '25 Years of [[Advisory Excellence]]'),
   b('home', 'about_p1', 'About blurb: paragraph 1', 'ACR Innovative Management Services is a multidisciplinary advisory firm headquartered in Calicut, Kerala, with an office in Dubai. Founded by <strong>Riju Chandrasekhar, FCA</strong> — with over 30 years of finance industry experience — ACR brings together Chartered Accountants, Company Secretaries, legal professionals, and business consultants.', 'RICHTEXT'),
   b('home', 'about_p2', 'About blurb: paragraph 2', 'We partner with startups, SMEs, and enterprises to simplify complexity, ensure compliance, and unlock measurable business value across India and the UAE.', 'RICHTEXT'),
@@ -311,7 +312,7 @@ export const blocks: BlockSeed[] = [
   b('about', 'hero_lead', 'Intro: lead paragraph', 'ACR Innovative Management Services was founded on a simple belief: businesses deserve more than compliance. They deserve clarity, strategy, and a partner who stays accountable through execution.'),
   b('about', 'hero_p1', 'Intro: paragraph 2', 'Founded by Riju Chandrasekhar, FCA — with over 30 years of experience across finance, taxation, and business advisory — ACR has grown into a multidisciplinary firm serving startups, SMEs, and enterprises across India and the UAE. Our team of Chartered Accountants, Company Secretaries, legal professionals, and business consultants works as one integrated unit.'),
   b('about', 'hero_p2', 'Intro: paragraph 3', 'Headquartered in Calicut, Kerala, with an established presence in Dubai, we combine deep local regulatory knowledge with international service standards.'),
-  { pageKey: 'about', blockKey: 'hero_image', label: 'Intro image', type: 'IMAGE', image: { file: 'in-acr-about.jpg', alt: 'ACR Innovative — professional advisory office' } },
+  { pageKey: 'about', blockKey: 'hero_image', label: 'Intro image', type: 'IMAGE', image: { file: 'in-acr-about.webp', alt: 'ACR Innovative — professional advisory office' } },
   b('about', 'team_title', 'Team section: title', 'Leadership & [[Team]]'),
   b('about', 'team_lead', 'Team section: subtitle', 'Built on deep expertise, guided by experience.'),
   b('about', 'track_kicker', 'Track record: small heading', 'Our track record'),
@@ -331,7 +332,7 @@ export const blocks: BlockSeed[] = [
   b('insights', 'cta_button', 'Bottom call to action: button text', 'Get in Touch'),
   b('insights', 'cta_button_url', 'Bottom call to action: button URL', '/contact'),
   // ---- careers
-  { pageKey: 'careers', blockKey: 'hero_image', label: 'Top image', type: 'IMAGE', image: { file: 'in-acr-careers.jpg', alt: 'ACR team workspace' } },
+  { pageKey: 'careers', blockKey: 'hero_image', label: 'Top image', type: 'IMAGE', image: { file: 'in-acr-careers.webp', alt: 'ACR team workspace' } },
   b('careers', 'hero_title', 'Page title (h1)', 'Join Our [[Team]]'),
   b('careers', 'hero_lead', 'Intro: lead paragraph', 'At ACR, we believe the best advisory comes from a team that genuinely cares — about the work, about each other, and about the clients we serve.'),
   b('careers', 'hero_p1', 'Intro: paragraph 2', 'We are a multidisciplinary firm where Chartered Accountants, Company Secretaries, legal professionals, and business consultants work together as one integrated team. If you are someone who takes ownership, thinks beyond your role, and wants to build something meaningful — we would love to hear from you.'),
